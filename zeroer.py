@@ -1,6 +1,16 @@
+import csv
+import fcntl
+import os
+import resource
+import time
+
+from sklearn.metrics import precision_score, recall_score, f1_score, \
+  confusion_matrix
+
 from data_loading_helper.data_loader import load_data
 from data_loading_helper.feature_extraction import *
 from utils import run_zeroer
+import utils
 from blocking_functions import *
 from os.path import join
 import argparse
@@ -108,9 +118,52 @@ if __name__ == '__main__':
     true_labels = candset_features_df.gold.values
     if np.sum(true_labels)==0:
         true_labels = None
+
+    start_time = time.time()
     y_pred = run_zeroer(similarity_features_df, similarity_features_lr,id_dfs,
                         true_labels ,LR_dup_free,LR_identical,run_trans)
+    end_time = time.time()
+    max_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     pred_df = candset_features_df[["ltable_id","rtable_id"]]
     pred_df['pred'] = y_pred
     pred_df.to_csv(join(dataset_path,"pred.csv"))
+
+    # Appending results
+    predicted_labels = np.round(np.clip(y_pred + utils.DEL, 0., 1.)).astype(int)
+    p = precision_score(true_labels, predicted_labels)
+    r = recall_score(true_labels, predicted_labels)
+    f1 = f1_score(true_labels, predicted_labels)
+    tn, fp, fn, tp = confusion_matrix(true_labels, predicted_labels).ravel()
+    f_star = 0 if (p + r - p * r) == 0 else p * r / (p + r - p * r)
+
+    result_file = '/home/remote/u6852937/projects/results.csv'
+    file_exists = os.path.isfile(result_file)
+
+    with open(result_file, 'a') as results_file:
+        heading_list = ['dataset_name', 'train_time', 'test_time',
+                        'train_max_mem', 'test_max_mem', 'TP', 'FP', 'FN',
+                        'TN', 'Pre', 'Re', 'F1', 'Fstar']
+        writer = csv.DictWriter(results_file, fieldnames=heading_list)
+
+        if not file_exists:
+          writer.writeheader()
+
+        fcntl.flock(results_file, fcntl.LOCK_EX)
+        result_dict = {
+            'dataset_name': dataset_name,
+            'train_time': end_time - start_time,
+            'test_time': 'NA',
+            'train_max_mem': max_mem,
+            'test_max_mem': 'NA',
+            'TP': tp,
+            'FP': fp,
+            'FN': fn,
+            'TN': tn,
+            'Pre': round(p * 100, 2),
+            'Re': round(r * 100, 2),
+            'F1': round(f1 * 100, 2),
+            'Fstar': round(f_star * 100, 2)
+        }
+        writer.writerow(result_dict)
+        fcntl.flock(results_file, fcntl.LOCK_UN)
 
