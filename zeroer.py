@@ -140,7 +140,7 @@ if __name__ == '__main__':
     file_exists = os.path.isfile(result_file)
 
     with open(result_file, 'a') as results_file:
-        heading_list = ['dataset_name', 'train_time', 'test_time',
+        heading_list = ['method', 'dataset_name', 'train_time', 'test_time',
                         'train_max_mem', 'test_max_mem', 'TP', 'FP', 'FN',
                         'TN', 'Pre', 'Re', 'F1', 'Fstar']
         writer = csv.DictWriter(results_file, fieldnames=heading_list)
@@ -150,6 +150,7 @@ if __name__ == '__main__':
 
         fcntl.flock(results_file, fcntl.LOCK_EX)
         result_dict = {
+            'method' : 'zeroer',
             'dataset_name': dataset_name,
             'train_time': end_time - start_time,
             'test_time': 'NA',
