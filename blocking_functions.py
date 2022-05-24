@@ -49,10 +49,10 @@ def blocking_for_citeseer_dblp(A, B):
 # fodors.csv and zagats.csv
 def block_fodors_zagats(A, B):
   ob = em.OverlapBlocker()
-  C = ob.block_tables(A, B, 'name', 'name',
+  C = ob.block_tables(A, B, 'name', 'name', word_level=True,
                       l_output_attrs=['name', 'addr', 'city', 'phone'],
                       r_output_attrs=['name', 'addr', 'city', 'phone'],
-                      overlap_size=1, show_progress=False)
+                      overlap_size=1, show_progress=True)
   return C
 
 
@@ -153,6 +153,15 @@ def block_abt_buy(A, B):
   C = ob.block_tables(A, B, "name", "name", word_level=True, overlap_size=1,
                       l_output_attrs=["name", "description", "price"],
                       r_output_attrs=["name", "description", "price"],
+                      show_progress=True, allow_missing=False)
+  return C
+
+def block_company(A, B):
+  ob = em.OverlapBlocker()
+  C = ob.block_tables(A, B, "content", "content", word_level=True,
+                      overlap_size=5,
+                      l_output_attrs=["content"],
+                      r_output_attrs=["content"],
                       show_progress=True, allow_missing=False)
   return C
 
@@ -290,7 +299,7 @@ def block_itunes_amazon(A, B):
                       r_output_attrs=['Song_Name', 'Artist_Name', 'Album_Name',
                                       'Genre', 'Price', 'CopyRight', 'Time',
                                       'Released'],
-                      show_progress=True, allow_missing=True, n_jobs=8)
+                      show_progress=True, allow_missing=True)
   return C
 
 
@@ -333,13 +342,15 @@ blocking_functions_mapping['wa'] = block_wa
 blocking_functions_mapping["dirty_dblp_acm"] = block_dblp_acm
 blocking_functions_mapping["dirty_dblp_scholar"] = block_dblp_scholar
 blocking_functions_mapping["dirty_itunes_amazon"] = block_itunes_amazon
-blocking_functions_mapping["dirty_walmart_amazon"] = block_walmart_amazon
+blocking_functions_mapping["dirty_walmart_amazon"] = block_wa
 blocking_functions_mapping["structured_amazon_google"] = block_amazon_google
 blocking_functions_mapping["structured_beer"] = block_beer
 blocking_functions_mapping["structured_dblp_acm"] = block_dblp_acm
 blocking_functions_mapping["structured_dblp_scholar"] = block_dblp_scholar
 blocking_functions_mapping["structured_fodors_zagats"] = block_fodors_zagats
 blocking_functions_mapping["structured_itunes_amazon"] = block_itunes_amazon
-blocking_functions_mapping["structured_walmart_amazon"] = block_walmart_amazon
+blocking_functions_mapping["structured_walmart_amazon"] = block_wa
+blocking_functions_mapping["textual_abt_buy"] = block_abt_buy
+blocking_functions_mapping["textual_company"] = block_company
 
 

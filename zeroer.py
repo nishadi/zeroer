@@ -4,8 +4,7 @@ import os
 import resource
 import time
 
-from sklearn.metrics import precision_score, recall_score, f1_score, \
-  confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 
 from data_loading_helper.data_loader import load_data
 from data_loading_helper.feature_extraction import *
