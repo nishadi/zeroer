@@ -57,14 +57,15 @@ if __name__ == '__main__':
         else:
             RIGHT_FILE = join(dataset_path, f.readline().strip())
         DUPLICATE_TUPLES = join(dataset_path, f.readline().strip())
+        BLOCK_FILE = join(dataset_path, 'train.csv')
         f.close()
         if run_trans==True and LR_dup_free==False and LR_identical==False:
             ltable_df, rtable_df, duplicates_df, candset_df,candset_df_l,candset_df_r = load_data(LEFT_FILE, RIGHT_FILE, DUPLICATE_TUPLES,
-                                                                                              blocking_func,
+                                                                                              BLOCK_FILE, blocking_func,
                                                                                               include_self_join=True)
         else:
             ltable_df, rtable_df, duplicates_df, candset_df = load_data(LEFT_FILE, RIGHT_FILE, DUPLICATE_TUPLES,
-                                                                                              blocking_func,
+                                                                                              BLOCK_FILE, blocking_func,
                                                                                               include_self_join=False)
             if LR_identical:
                 print("removing self matches")
